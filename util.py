@@ -3,6 +3,9 @@ from functools import reduce
 from operator import mul
 from timeit import default_timer
 import pickle
+import os
+import itertools
+import json
 
 
 def prod(iterable):
@@ -25,63 +28,39 @@ class Timer(object):
         self.tracker.append(self.elapsed)
 
 
-def measure(rnn):
-    repeats = 5
-    fw_timings = []
-    bw_timings = []
-    for i in range(repeats):
-        with Timer(fw_timings):
-            rnn.forwardProp()
-        with Timer(bw_timings):
-            rnn.backProp()
-    return fw_timings, bw_timings
-
-def measure_fw(rnn):
+def measure(callable, *args, **kwargs):
     repeats = 5
     fw_timings = []
     for i in range(repeats):
         with Timer(fw_timings):
-            rnn.forwardProp()
+            callable(*args, **kwargs)
     return fw_timings
 
+def splitoutput(lines):
+    spl = []
+    for x, y in itertools.groupby(lines, lambda z: z.startswith("***Start***")):
+        if x: spl.append([])
+        spl[-1].extend(y)
+    return spl
 
-def LoadText():
-    #open text and return input and output data (series of words)
-    with open("big2.txt", "r") as text_file:
-        data = text_file.read()
-    text = list(data)
-    outputSize = len(text)
-    data = list(set(text))
-    uniqueWords, dataSize = len(data), len(data) 
-    returnData = np.zeros((uniqueWords, dataSize))
-    for i in range(0, dataSize):
-        returnData[i][i] = 1
-    returnData = np.append(returnData, np.atleast_2d(data), axis=0)
-    output = np.zeros((uniqueWords, outputSize))
-    for i in range(0, outputSize):
-        index = np.where(np.asarray(data) == text[i])
-        output[:,i] = returnData[0:-1,index[0]].astype(float).ravel()
-    return returnData, uniqueWords, output, outputSize, data
+def read_raw_data(filename):
+    assert(os.path.isfile(filename))
+    with open(filename) as f:
+        lines = f.readlines()
+    return splitoutput(lines)
 
-def preprocess():
-    returnData, uniqueWords, output, outputSize, data = LoadText()
-    pickle.dump( (returnData, uniqueWords, output, outputSize, data), open( "save.p", "wb" ) )
+def parse_data_point(data_point, x_label):
+    exp_params = json.loads(data_point[1])
+    x = exp_params[x_label]
+    y = float(data_point[3])
+    return (x, y)
 
-def loadpickled():
-    returnData, uniqueWords, output, outputSize, data = pickle.load(open("save.p", "rb"))
-    return returnData, uniqueWords, output, outputSize, data
+def parse_data_file(filename, x_label):
+    datapoints = read_raw_data(filename)
+    data = [parse_data_point(x, x_label) for x in datapoints]
+    return list(zip(*data))
 
-#write the predicted output (series of words) to disk
-def ExportText(output, data):
-    finalOutput = np.zeros_like(output)
-    prob = np.zeros_like(output[0])
-    outputText = ""
-    print(len(data))
-    print(output.shape[0])
-    for i in range(0, output.shape[0]):
-        for j in range(0, output.shape[1]):
-            prob[j] = output[i][j] / np.sum(output[i])
-        outputText += np.random.choice(data, p=prob)    
-    with open("output.txt", "w") as text_file:
-        text_file.write(outputText)
-    return
+
+
+
+
