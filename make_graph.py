@@ -5,8 +5,8 @@ from util import parse_data_file
 
 parser= argparse.ArgumentParser(prog='make_graph.py', usage='python %(prog)s -f Filename Series_name -f Filename2 Series_name2 ')
 parser.add_argument ('-f', '--file', nargs=2, action='append', help="Data file to plot from", required=True)
-parser.add_argument('-t', '--title', nargs=1, type=str, help="Chart Title", required=True)
-parser.add_argument('-x', '--x', type=str, help="X dimension", required=True)
+parser.add_argument('-t', '--title', type=str, help="Chart Title", required=True)
+parser.add_argument('-x', '--x', type=str, help="X dimension", default="interval")
 parser.add_argument ('-b', '--baseline', nargs=1, action='append', help="Data file to read baseline", required=True)
 parser.add_argument('-o', '--output-file', help="Name of the output chart", required=True)
 
@@ -31,6 +31,7 @@ for i, (filename, series_name) in enumerate(files):
 plt.xlabel('Interval')
 plt.ylabel('Execution time (ms)')
 plt.legend(loc='lower right')
+plt.suptitle(title)
 plt.savefig(output_file, bbox_inches='tight')
     
     
