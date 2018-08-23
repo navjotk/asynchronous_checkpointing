@@ -32,3 +32,5 @@ baseline-%.txt: $(CODE_FILES)
 clean:
 	rm -rf tmp
 	mkdir tmp
+	rm *.txt
+	rm plot_orders.pdf plot_checkpoint_sizes.pdf

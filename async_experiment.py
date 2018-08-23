@@ -1,20 +1,12 @@
-from dummyoperator import DummyCheckpoint
+from dummyoperator import DummyOperator, DummyCheckpoint
 from ast import literal_eval as make_tuple
 from pyrevolve import Checkpointer
 import numpy as np
 import argparse
 import json
-from util import Timer
+from util import Timer, measure
 from devitooperators import DevitoOperator
 
-
-def measure(callable, *args, **kwargs):
-    repeats = 5
-    fw_timings = []
-    for i in range(repeats):
-        with Timer(fw_timings):
-            callable(*args, **kwargs)
-    return fw_timings
 
 parser = argparse.ArgumentParser(description='Run an asynchronous checkpointing timing experiment')
 parser.add_argument('size', type=int, nargs='?', default="100", help='size of domain')
@@ -32,7 +24,7 @@ wf_parser = parser.add_mutually_exclusive_group(required=False)
 wf_parser.add_argument('--write-files', dest='write_files', action='store_true')
 wf_parser.add_argument('--no-write-files', dest='write_files', action='store_false')
 parser.set_defaults(write_files=True)
-parser.add_argument('--file-prefix', type=str, nargs=1, default="./tmp", help="Prefix for the directory to use to store temp files")
+parser.add_argument('--file-prefix', type=str, default="./tmp", help="Prefix for the directory to use to store temp files")
 
 args = parser.parse_args()
 print("***Start***")
