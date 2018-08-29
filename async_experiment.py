@@ -1,4 +1,4 @@
-from dummyoperator import DummyOperator, DummyCheckpoint
+from dummyoperator import DummyCheckpoint
 from ast import literal_eval as make_tuple
 from pyrevolve import Checkpointer
 import numpy as np

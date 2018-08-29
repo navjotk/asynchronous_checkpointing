@@ -29,7 +29,7 @@ for i, (filename, series_name) in enumerate(files):
     change_ys = [(y-base_y)/base_y for y, base_y in zip(ys, base_ys)]
     plt.plot(xs, change_ys, label=series_name)
 plt.xlabel('Interval')
-plt.ylabel('Execution time (s)')
+plt.ylabel('Relative slowdown')
 plt.legend(loc='lower right')
 plt.suptitle(title)
 plt.savefig(output_file, bbox_inches='tight')
